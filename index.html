@@ -1,0 +1,925 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AdmitIQ — AI admissions copilot</title>
+<meta name="description" content="AdmitIQ is an AI admissions copilot. It reads your profile, your school list and your deadlines, then hands you the one thing to work on next.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 34'%3E%3Crect width='46' height='34' fill='%2314120F'/%3E%3Cellipse cx='18' cy='17' rx='14' ry='11.5' fill='%231A46D0' transform='rotate(-9 18 17)'/%3E%3Cellipse cx='29' cy='17' rx='14' ry='11.5' fill='%23F3EFE4' transform='rotate(7 29 17)'/%3E%3C/svg%3E">
+<style>
+@font-face{font-family:'Archivo';font-style:normal;font-weight:400 900;font-stretch:62% 125%;font-display:swap;
+  src:url(fonts/archivo-400_900.woff2) format('woff2'),
+      url(https://fonts.gstatic.com/s/archivo/v25/k3kQo8UDI-1M0wlSfdnoLmvDIaI.woff2) format('woff2');}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:400;font-display:swap;
+  src:url(fonts/dmmono-400.woff2) format('woff2'),
+      url(https://fonts.gstatic.com/s/dmmono/v16/aFTU7PB1QTsUX8KYthqQBK6PYK0.woff2) format('woff2');}
+@font-face{font-family:'DM Mono';font-style:normal;font-weight:500;font-display:swap;
+  src:url(fonts/dmmono-500.woff2) format('woff2'),
+      url(https://fonts.gstatic.com/s/dmmono/v16/aFTR7PB1QTsUX8KYvumzEYOtbYf-Vlg.woff2) format('woff2');}
+@font-face{font-family:'Caveat';font-style:normal;font-weight:500 700;font-display:swap;
+  src:url(fonts/caveat-500_700.woff2) format('woff2'),
+      url(https://fonts.gstatic.com/s/caveat/v23/Wnz6HAc5bAfYB2Q7ZjYYiAzcPA.woff2) format('woff2');}
+
+:root{
+  --desk:#14120F; --paper:#F3EFE4; --paper-2:#E9E2D1;
+  --ink:#1A1A18; --ink-soft:#4A4740;
+  --red:#C22D1E; --blue:#1A46D0;
+  --rule:rgba(26,26,24,.24); --rule-soft:rgba(26,26,24,.13);
+  --mono:'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:'Archivo',system-ui,-apple-system,'Helvetica Neue',Arial,sans-serif;
+  --hand:'Caveat','Bradley Hand',cursive;
+  --grain:none;
+  --pad:clamp(20px,4vw,52px);
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;color-scheme:dark;
+  scrollbar-color:#3B362D var(--desk);scrollbar-width:thin}
+body{margin:0;background:var(--desk);color:var(--paper);
+  font-family:var(--sans);font-size:17px;line-height:1.6;
+  font-variant-numeric:tabular-nums;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(120% 70% at 50% -10%,rgba(255,226,176,.10),rgba(255,226,176,0) 60%),
+             radial-gradient(140% 120% at 50% 45%,rgba(0,0,0,0) 35%,rgba(0,0,0,.55) 100%)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:1;
+  background-image:var(--grain);background-size:160px 160px;opacity:.5;mix-blend-mode:overlay}
+::selection{background:var(--blue);color:var(--paper)}
+:focus-visible{outline:2px solid currentColor;outline-offset:3px}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-track{background:var(--desk)}
+::-webkit-scrollbar-thumb{background:#3B362D;border:3px solid var(--desk)}
+::-webkit-scrollbar-thumb:hover{background:#5A5347}
+img,svg,canvas{display:block;max-width:100%}
+a{color:inherit}
+button{font:inherit;color:inherit}
+.mono{font-family:var(--mono);font-size:.6875rem;letter-spacing:.14em;text-transform:uppercase;font-weight:500}
+
+.paper-sheet{background:var(--paper);color:var(--ink);position:relative;
+  box-shadow:0 26px 60px -28px rgba(0,0,0,.9),0 2px 0 rgba(255,255,255,.05)}
+.paper-sheet::after,.masthead::after,.foot::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--grain);background-size:160px 160px;opacity:.32;mix-blend-mode:multiply}
+
+.masthead{position:sticky;top:0;z-index:40;background:var(--paper);color:var(--ink);
+  border-bottom:1.5px solid var(--red)}
+.mast-in{max-width:1200px;margin:0 auto;padding:0 var(--pad);height:64px;
+  display:flex;align-items:center;gap:26px;position:relative;z-index:1}
+.brand{display:flex;align-items:center;gap:11px;text-decoration:none;margin-right:auto}
+.mark{width:34px;height:26px;flex:none}
+.wm{font-weight:800;font-size:1.24rem;letter-spacing:-.03em;font-stretch:96%}
+.wm .iq{color:var(--blue)}
+.nav{display:flex;align-items:center;gap:24px}
+.nav a:not(.btn){font-family:var(--mono);font-size:.6875rem;letter-spacing:.13em;text-transform:uppercase;
+  text-decoration:none;color:var(--ink-soft);padding:6px 0;border-bottom:1.5px solid transparent;
+  transition:color .18s ease,border-color .18s ease}
+.nav a:not(.btn):hover{color:var(--ink);border-bottom-color:var(--red)}
+.formcode{font-family:var(--mono);font-size:.625rem;letter-spacing:.16em;color:var(--red);
+  border:1px solid rgba(194,45,30,.45);padding:5px 9px}
+.btn{display:inline-flex;align-items:center;gap:.6em;font-family:var(--mono);font-size:.75rem;
+  letter-spacing:.13em;text-transform:uppercase;font-weight:500;text-decoration:none;
+  background:var(--ink);color:var(--paper);border:1.5px solid var(--ink);padding:13px 22px;
+  cursor:pointer;transition:background .18s ease,color .18s ease,transform .18s cubic-bezier(.16,1,.3,1)}
+.btn:hover{background:var(--red);border-color:var(--red);color:var(--paper);transform:translateY(-2px)}
+.btn:active{transform:translateY(0)}
+.btn-sm{padding:9px 16px;font-size:.6875rem}
+
+main{position:relative;z-index:2;max-width:1200px;margin:0 auto;padding:0 var(--pad) 0}
+.sheet-stack{display:flex;flex-direction:column;gap:26px;padding:34px 0 46px}
+
+.hero{padding:clamp(26px,4vw,54px) 0 0}
+.hero-in{padding:0 clamp(20px,3.4vw,46px)}
+.hero h1{font-size:clamp(2.7rem,6vw,6rem);line-height:.93;letter-spacing:-.038em;font-weight:800;
+  font-stretch:88%;margin:0 0 22px;max-width:16ch;text-wrap:balance}
+.h1-oval{display:inline-block;width:.7em;height:.48em;border:2.5px solid var(--ink);
+  border-radius:50%;vertical-align:.04em;margin-left:.1em;background:transparent;
+  transition:background .5s cubic-bezier(.16,1,.3,1) .7s}
+.h1-oval.is-marked{background:var(--ink)}
+.hero-lede{font-size:clamp(1.02rem,1.35vw,1.2rem);line-height:1.55;color:var(--ink-soft);
+  max-width:60ch;margin:0 0 30px}
+.hero-lede b{color:var(--ink);font-weight:700}
+.hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:18px 26px;margin-bottom:8px}
+.hero-actions .note{font-family:var(--mono);font-size:.6875rem;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--red)}
+.link-under{font-family:var(--mono);font-size:.75rem;letter-spacing:.13em;text-transform:uppercase;
+  text-decoration:none;color:var(--ink);border-bottom:1.5px solid var(--rule);padding:4px 0 3px;
+  transition:border-color .2s ease}
+.link-under:hover{border-bottom-color:var(--red)}
+.band{margin-top:clamp(26px,4vw,46px);border-top:1.5px solid var(--red);padding-top:18px}
+
+.grid-wrap{position:relative;width:100%;display:flex;justify-content:center;align-items:center;touch-action:pan-y;cursor:crosshair}
+.scanline{position:absolute;left:0;right:0;top:0;height:30px;opacity:0;pointer-events:none;
+  background:linear-gradient(180deg,rgba(255,255,255,0) 0%,rgba(255,255,255,.5) 55%,rgba(255,255,255,.7) 88%);
+  border-bottom:1.5px solid rgba(26,26,24,.5);
+  box-shadow:0 7px 16px -9px rgba(26,26,24,.45)}
+
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:18px;
+  padding:10px 0 9px;border-top:1.5px solid var(--red);border-bottom:1px solid var(--rule);
+  color:var(--red);font-family:var(--mono);font-size:.6875rem;letter-spacing:.15em;
+  text-transform:uppercase;font-weight:500}
+.sec-head .r{color:var(--ink-soft);text-align:right}
+h2{font-size:clamp(1.75rem,3.1vw,2.7rem);line-height:1.03;letter-spacing:-.03em;font-weight:800;
+  font-stretch:90%;margin:26px 0 16px;max-width:22ch;text-wrap:balance}
+.lead{font-size:1.04rem;line-height:1.6;color:var(--ink-soft);max-width:68ch;margin:0 0 30px}
+
+.doc{padding:clamp(22px,3.4vw,44px) clamp(20px,3.4vw,46px) clamp(30px,4vw,54px)}
+.read-grid{display:grid;grid-template-columns:1.5fr .95fr;gap:clamp(24px,3vw,44px);align-items:start}
+table.read{width:100%;border-collapse:collapse;font-size:.95rem}
+table.read th{font-family:var(--mono);font-size:.625rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--red);text-align:left;font-weight:500;padding:0 10px 9px 0;border-bottom:1.5px solid var(--ink)}
+table.read th:last-child,table.read td:last-child{padding-right:0}
+table.read td{padding:15px 10px 15px 0;border-bottom:1px solid var(--rule-soft);vertical-align:top}
+table.read tbody tr:last-child td{border-bottom:1.5px solid var(--ink)}
+table.read tbody tr{transition:background .18s ease}
+table.read tbody tr:hover{background:rgba(26,26,24,.05)}
+.item{font-weight:700;letter-spacing:-.01em;white-space:nowrap}
+.read-cell{color:var(--ink-soft);line-height:1.45;max-width:44ch}
+.bubbles{display:flex;gap:6px;align-items:center}
+.bub{width:17px;height:12.5px;border:1.5px solid var(--ink);border-radius:50%;flex:none;
+  background:transparent;transition:background .3s cubic-bezier(.16,1,.3,1)}
+.bub.on{background:var(--ink)}
+tr:hover .bub:not(.on){background:rgba(26,26,24,.16)}
+.next{border:1.5px solid var(--blue);padding:20px 22px 22px;background:rgba(26,70,208,.04)}
+.next .lbl{font-family:var(--mono);font-size:.625rem;letter-spacing:.17em;text-transform:uppercase;
+  color:var(--blue);font-weight:500}
+.next p{margin:10px 0 0;font-size:1.16rem;line-height:1.35;font-weight:700;letter-spacing:-.015em}
+.hand{font-family:var(--hand);font-size:1.5rem;line-height:1.1;color:var(--blue);
+  transform:rotate(-3deg);margin:22px 0 0;display:block}
+.synthetic{font-family:var(--mono);font-size:.625rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--red);margin-top:16px}
+
+.jobs{list-style:none;margin:0;padding:0;border-top:1.5px solid var(--ink)}
+.jobs li{display:grid;grid-template-columns:auto .85fr 1.4fr;gap:8px clamp(16px,2.4vw,34px);
+  align-items:baseline;padding:22px 0;border-bottom:1px solid var(--rule-soft)}
+.jobs li:last-child{border-bottom:1.5px solid var(--ink)}
+.job-bub{width:22px;height:16px;border:2px solid var(--ink);border-radius:50%;
+  background:transparent;align-self:center;transition:background .5s cubic-bezier(.16,1,.3,1)}
+.jobs li.in .job-bub{background:var(--ink)}
+.jobs h3{margin:0;font-size:clamp(1.15rem,1.7vw,1.5rem);letter-spacing:-.02em;font-weight:800;font-stretch:92%}
+.jobs p{margin:0;color:var(--ink-soft);line-height:1.5;font-size:1rem;max-width:56ch}
+
+.slip{padding:clamp(30px,4vw,56px) clamp(22px,3.4vw,50px);transform:rotate(-.5deg);
+  display:grid;grid-template-columns:1fr auto;gap:26px;align-items:center}
+.slip h2{margin:0 0 10px}
+.slip p{margin:0;color:var(--ink-soft);max-width:52ch}
+.slip .btn{padding:19px 30px;font-size:.8125rem}
+
+.foot{border-top:1.5px solid var(--red);background:var(--paper);color:var(--ink);
+  position:relative;z-index:2}
+.foot-in{max-width:1200px;margin:0 auto;padding:18px var(--pad);display:flex;flex-wrap:wrap;
+  gap:14px 26px;align-items:center;justify-content:space-between;position:relative;z-index:1;
+  font-family:var(--mono);font-size:.625rem;letter-spacing:.15em;text-transform:uppercase;color:var(--ink-soft)}
+.foot-in .brand{margin:0}
+.foot-in .wm{font-size:.95rem;color:var(--ink)}
+.replay{background:none;border:1px solid var(--rule);padding:8px 13px;cursor:pointer;
+  font-family:var(--mono);font-size:.625rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink);transition:border-color .18s,color .18s}
+.replay:hover{border-color:var(--red);color:var(--red)}
+
+@media (prefers-reduced-motion:no-preference){
+  html.intro-live .rise{animation:rise .78s cubic-bezier(.16,1,.3,1) both}
+  html.intro-live .rise-1{animation-delay:.08s}
+  html.intro-live .rise-2{animation-delay:.16s}
+  html.intro-live .rise-3{animation-delay:.24s}
+  html.intro-live .rise-4{animation-delay:.32s}
+}
+@keyframes rise{from{opacity:0;transform:translateY(26px)}to{opacity:1;transform:none}}
+
+#splash{display:none;position:fixed;inset:0;z-index:100}
+html.has-splash #splash{display:block}
+html.has-splash{overflow:hidden}
+.deskglow{position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(110% 65% at 50% -8%,rgba(255,226,176,.16),rgba(255,226,176,0) 62%);
+  animation:fade-up .5s ease-out both}
+.sheet{position:absolute;left:50%;top:50%;width:min(93vw,1320px);height:min(88vh,880px);
+  transform:translate(-50%,-50%) rotate(.35deg);
+  background:var(--paper);color:var(--ink);display:flex;flex-direction:column;
+  box-shadow:0 50px 90px -40px rgba(0,0,0,.95),0 0 0 1px rgba(26,26,24,.14);
+  animation:sheet-in .42s cubic-bezier(.16,1,.3,1) both}
+@keyframes sheet-in{from{opacity:0;transform:translate(-50%,-45%) rotate(1.7deg) scale(.985)}
+  to{opacity:1;transform:translate(-50%,-50%) rotate(.35deg) scale(1)}}
+.sheet::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background-image:var(--grain);background-size:160px 160px;opacity:.4;mix-blend-mode:multiply}
+.sheet-in{position:relative;z-index:1;flex:1;display:flex;flex-direction:column;
+  padding:clamp(14px,2vw,26px) clamp(16px,2.4vw,34px) clamp(14px,2vw,24px) clamp(28px,3.4vw,56px);
+  min-height:0}
+.tm{position:absolute;top:0;bottom:0;width:9px;display:flex;flex-direction:column;
+  justify-content:space-between;padding:14px 0;pointer-events:none}
+.tm.l{left:9px}.tm.r{right:9px}
+.tm i{display:block;height:3.5px;background:var(--ink);opacity:0;animation:tick .26s ease-out both}
+@keyframes tick{from{opacity:0;transform:scaleX(.2)}to{opacity:.92;transform:none}}
+
+.f-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;animation:fade-up .4s ease-out .12s both}
+.f-title{font-weight:800;font-size:clamp(.95rem,1.5vw,1.3rem);letter-spacing:.02em;
+  font-stretch:88%;text-transform:uppercase}
+.f-code{font-family:var(--mono);font-size:.625rem;letter-spacing:.16em;color:var(--red);text-transform:uppercase}
+.f-scan{margin-left:auto;font-family:var(--mono);font-size:.625rem;letter-spacing:.16em;
+  color:var(--ink-soft);text-transform:uppercase;white-space:nowrap}
+.f-instr{display:flex;flex-wrap:wrap;gap:6px 22px;margin-top:10px;padding:7px 0;
+  border-top:1.5px solid var(--red);border-bottom:1px solid var(--red);
+  font-family:var(--mono);font-size:clamp(.625rem,.75vw,.6875rem);letter-spacing:.14em;
+  color:var(--red);text-transform:uppercase;animation:fade-up .4s ease-out .2s both}
+.f-mid{flex:1;min-height:0;display:flex;flex-direction:column;justify-content:center;
+  padding:clamp(8px,1.4vh,20px) 0}
+.f-mid .grid-wrap{flex:1;min-height:0}
+.f-foot{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  animation:fade-up .4s ease-out .34s both}
+.legend{display:flex;gap:13px;align-items:flex-end}
+.legend div{display:flex;flex-direction:column;align-items:center;gap:5px}
+.legend span{width:17px;height:12.5px;border:1.5px solid var(--ink);border-radius:50%}
+.legend b{font-family:var(--mono);font-size:.625rem;letter-spacing:.1em;color:var(--ink-soft);font-weight:400}
+.f-end{font-family:var(--mono);font-size:.625rem;letter-spacing:.15em;color:var(--red);
+  text-transform:uppercase;text-align:right;line-height:1.7}
+@keyframes fade-up{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+
+.stamp{position:absolute;right:clamp(16px,3vw,56px);bottom:clamp(64px,10vh,116px);z-index:3;
+  color:var(--blue);border:2.5px solid var(--blue);outline:1.5px solid var(--blue);outline-offset:4px;
+  padding:9px 17px 10px;text-align:center;transform:rotate(-6.5deg) scale(1.55);opacity:0;
+  mix-blend-mode:multiply;pointer-events:none}
+.stamp .mark{width:30px;height:23px;margin:0 auto 3px}
+.stamp .word{font-weight:800;font-size:.9rem;letter-spacing:.16em;font-stretch:88%}
+.stamp.on{animation:stamp-hit .34s cubic-bezier(.22,1,.36,1) both}
+@keyframes stamp-hit{from{opacity:0;transform:rotate(-6.5deg) scale(1.55)}
+  to{opacity:.92;transform:rotate(-6.5deg) scale(1)}}
+.hand-note{position:absolute;right:clamp(118px,16vw,258px);bottom:clamp(62px,9.6vh,110px);
+  z-index:3;font-family:var(--hand);font-size:clamp(1.05rem,1.7vw,1.5rem);color:var(--blue);
+  transform:rotate(-3deg);opacity:0;pointer-events:none;white-space:nowrap;
+  display:flex;align-items:center;gap:4px}
+.hand-note.on{animation:fade-up .45s ease-out both}
+.hand-note svg{width:54px;height:26px;overflow:visible;flex:none}
+.hand-note path{fill:none;stroke:var(--blue);stroke-width:2;stroke-linecap:round;
+  stroke-dasharray:90;stroke-dashoffset:90}
+.hand-note.on path{animation:draw .5s ease-out .15s both}
+@keyframes draw{to{stroke-dashoffset:0}}
+
+.skip{position:absolute;right:clamp(12px,2vw,26px);bottom:clamp(12px,2vw,26px);z-index:6;
+  background:rgba(20,18,15,.93);color:var(--paper);border:1px solid rgba(243,239,228,.36);
+  padding:11px 17px;font-family:var(--mono);font-size:.6875rem;letter-spacing:.16em;
+  text-transform:uppercase;cursor:pointer;transition:background .18s,border-color .18s,color .18s}
+.skip:hover{background:var(--paper);color:var(--desk);border-color:var(--paper)}
+
+#splash.out .sheet{animation:sheet-out .62s cubic-bezier(.55,.06,.68,.19) forwards}
+#splash.out .deskglow,#splash.out .skip{animation:bye .3s ease-in forwards}
+@keyframes sheet-out{to{transform:translate(-50%,-170%) rotate(-1.6deg) scale(1.02)}}
+@keyframes bye{to{opacity:0}}
+#splash.jolt .sheet{animation:sheet-jolt .17s ease-in-out 1}
+@keyframes sheet-jolt{
+  0%{transform:translate(-50%,-50%) rotate(.35deg)}
+  45%{transform:translate(-50%,calc(-50% + 7px)) rotate(.35deg)}
+  80%{transform:translate(-50%,calc(-50% - 3px)) rotate(.35deg)}
+  100%{transform:translate(-50%,-50%) rotate(.35deg)}}
+
+#fx{position:fixed;inset:0;z-index:110;pointer-events:none;overflow:hidden}
+#fx i{position:absolute;display:block;border-radius:50%;background:var(--paper);opacity:.92}
+
+@media (max-width:900px){
+  .read-grid{grid-template-columns:1fr}
+  .jobs li{grid-template-columns:auto 1fr;row-gap:6px}
+  .jobs li p{grid-column:2}
+  .slip{grid-template-columns:1fr}
+  .nav a:not(.btn){display:none}
+  .hand-note{right:clamp(14px,4vw,40px);bottom:clamp(158px,21vh,208px);font-size:1.05rem}
+}
+@media (max-width:640px){
+  .formcode{display:none}
+  .mast-in{gap:14px}
+  .legend{display:none}
+  table.read thead{display:none}
+  table.read tbody tr{display:block;padding:14px 0;border-bottom:1px solid var(--rule-soft)}
+  table.read td{display:block;padding:3px 0;border:0}
+  table.read tbody tr:last-child{border-bottom:1.5px solid var(--ink)}
+  table.read td:last-child{padding-top:7px}
+  .item{display:inline-block!important;margin-right:10px}
+  .bubbles{display:inline-flex}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-delay:0s!important;
+    transition-duration:.15s!important;transition-delay:0s!important;scroll-behavior:auto!important}
+  #splash{transition:opacity .45s ease}
+  #splash.out{opacity:0}
+  #splash.out .sheet,#splash.out .deskglow,#splash.out .skip{animation:none!important;opacity:1}
+  #splash.out .sheet{transform:translate(-50%,-50%) rotate(.35deg)}
+  .stamp{opacity:.92;transform:rotate(-6.5deg) scale(1)}
+  .hand-note{opacity:1}
+}
+</style>
+</head>
+<body>
+
+<!-- DIRECTION CONTRACT · seed b0c93ac5
+THESIS: Admissions is a standardized test you can actually prepare for; the opening screen is an OMR answer sheet being marked and scanned, refusing this category's dark neon AI loader.
+OWN-WORLD: bone paper #F3EFE4 on a warm graphite desk #14120F; graphite #1A1A18 marks, form-print red #C22D1E rules and labels, one mark blue #1A46D0 for the machine's hand; Archivo + DM Mono + Caveat; ovals, hairlines, timing marks; no rounded cards, no gradients.
+STORY: the form prints itself, a wave marks ADMITIQ with IQ in blue, a scan head reads the grid, the logo stamps, the sheet is pulled away and the landing page was underneath.
+FIRST VIEWPORT: desk-framed sheet at 93vw x 88vh; red form print, timing marks, a 37-column oval grid; the wordmark marked inside it; SKIP bottom-right.
+FORM: OMR Answer Sheet (IMPECCABLE'S PICK, grounded; the roll dealt Departures Board). Seed key b0c93ac5.
+FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md -->
+
+<header class="masthead">
+  <div class="mast-in">
+    <a class="brand" href="#top" aria-label="AdmitIQ home">
+      <svg class="mark" viewBox="0 0 46 34" aria-hidden="true">
+        <ellipse cx="18" cy="17" rx="15" ry="12.5" fill="#1A46D0" transform="rotate(-9 18 17)"/>
+        <ellipse cx="29" cy="17" rx="15" ry="12.5" fill="#1A1A18" transform="rotate(7 29 17)" style="mix-blend-mode:multiply"/>
+      </svg>
+      <span class="wm">Admit<span class="iq">IQ</span></span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#read">The read</a>
+      <a href="#does">What it does</a>
+      <span class="formcode">Form AI-2026</span>
+      <a class="btn btn-sm" href="#start">Start your sheet</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+<div class="sheet-stack" id="top">
+
+  <section class="paper-sheet hero" aria-labelledby="h1">
+    <div class="hero-in">
+      <div class="rise rise-1">
+        <h1 id="h1">Mark one oval<i class="h1-oval" id="h1Oval" aria-hidden="true"></i> AdmitIQ reads the rest.</h1>
+      </div>
+      <div class="rise rise-2">
+        <p class="hero-lede">AdmitIQ is an <b>AI admissions copilot</b>. It reads your profile, your school list and your deadlines together, then hands you the one thing to work on next — in that order.</p>
+      </div>
+      <div class="rise rise-3">
+        <div class="hero-actions">
+          <a class="btn" href="#start">Start your sheet</a>
+          <a class="link-under" href="#read">See how it reads ↓</a>
+          <span class="note">No. 2 pencil required — just start</span>
+        </div>
+      </div>
+      <div class="rise rise-4">
+        <div class="band">
+          <div class="grid-wrap" id="heroGrid" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper-sheet doc" id="read" aria-labelledby="h2read">
+    <div class="sec-head"><span>Section I · The read</span><span class="r">Sample sheet · synthetic data</span></div>
+    <div class="rise rise-1">
+      <h2 id="h2read">It reads the whole sheet, not one question.</h2>
+      <p class="lead">A tool that only sees the essay gives you essay advice. AdmitIQ marks every field at once, so what it says about one part already knows what the rest of your application says.</p>
+    </div>
+
+    <div class="read-grid">
+      <div>
+        <table class="read">
+          <thead><tr><th scope="col">Item</th><th scope="col">Mark</th><th scope="col">Read</th></tr></thead>
+          <tbody>
+            <tr>
+              <td class="item">Profile</td>
+              <td><span class="bubbles" role="img" aria-label="4 of 5 marked"><i class="bub on"></i><i class="bub on"></i><i class="bub on"></i><i class="bub on"></i><i class="bub"></i></span></td>
+              <td class="read-cell">Two scores and a thin activity list. The spine holds — the story does not.</td>
+            </tr>
+            <tr>
+              <td class="item">School list</td>
+              <td><span class="bubbles" role="img" aria-label="3 of 5 marked"><i class="bub on"></i><i class="bub on"></i><i class="bub on"></i><i class="bub"></i><i class="bub"></i></span></td>
+              <td class="read-cell">Two schools sit outside the range. Move them before you draft a word.</td>
+            </tr>
+            <tr>
+              <td class="item">Essay arc</td>
+              <td><span class="bubbles" role="img" aria-label="2 of 5 marked"><i class="bub on"></i><i class="bub on"></i><i class="bub"></i><i class="bub"></i><i class="bub"></i></span></td>
+              <td class="read-cell">Draft two argues the wrong thing. The second paragraph is where it breaks.</td>
+            </tr>
+            <tr>
+              <td class="item">Deadlines</td>
+              <td><span class="bubbles" role="img" aria-label="5 of 5 marked"><i class="bub on"></i><i class="bub on"></i><i class="bub on"></i><i class="bub on"></i><i class="bub on"></i></span></td>
+              <td class="read-cell">Eleven dates, one calendar, nothing quietly slipping.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div>
+        <div class="next">
+          <span class="lbl">Tonight's one answer</span>
+          <p>Rewrite draft two's second paragraph. Everything else on the sheet can wait until it argues the right thing.</p>
+        </div>
+        <span class="hand">start here —</span>
+        <p class="synthetic">Sample sheet · synthetic data · replace with real product output</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="paper-sheet doc" id="does" aria-labelledby="h2does">
+    <div class="sec-head"><span>Section II · What it does</span><span class="r">Three jobs · one sheet</span></div>
+    <div class="rise rise-1">
+      <h2 id="h2does">Three jobs, marked on one sheet.</h2>
+    </div>
+    <ul class="jobs">
+      <li class="job"><span class="job-bub" aria-hidden="true"></span>
+        <h3>Plan the list</h3>
+        <p>Build a school list against your profile and your budget, with every deadline on the same calendar.</p></li>
+      <li class="job"><span class="job-bub" aria-hidden="true"></span>
+        <h3>Write the essays</h3>
+        <p>Draft, cut and re-argue with a copilot that already knows what the rest of your application says.</p></li>
+      <li class="job"><span class="job-bub" aria-hidden="true"></span>
+        <h3>Take the next move</h3>
+        <p>Every session ends the way an exam does — one answer, marked, so you know what tonight is for.</p></li>
+    </ul>
+  </section>
+
+  <section class="paper-sheet slip" id="start" aria-labelledby="h2start">
+    <div>
+      <h2 id="h2start">Start your sheet.</h2>
+      <p>Bring your profile, your list and your deadlines. AdmitIQ marks what comes next.</p>
+    </div>
+    <a class="btn" href="#start">Start your sheet →</a>
+  </section>
+
+</div>
+</main>
+
+<footer class="foot">
+  <div class="foot-in">
+    <a class="brand" href="#top" aria-label="AdmitIQ home">
+      <svg class="mark" viewBox="0 0 46 34" aria-hidden="true">
+        <ellipse cx="18" cy="17" rx="15" ry="12.5" fill="#1A46D0" transform="rotate(-9 18 17)"/>
+        <ellipse cx="29" cy="17" rx="15" ry="12.5" fill="#1A1A18" transform="rotate(7 29 17)" style="mix-blend-mode:multiply"/>
+      </svg>
+      <span class="wm">Admit<span class="iq">IQ</span></span>
+    </a>
+    <span>Form AI-2026 · Page 1 of 1</span>
+    <span>Sample contents are synthetic</span>
+    <button class="replay" id="replay" type="button">↺ Replay intro</button>
+  </div>
+</footer>
+
+<div id="fx" aria-hidden="true"></div>
+
+<div id="splash">
+  <div class="deskglow"></div>
+  <div class="sheet">
+    <div class="sheet-in">
+      <div class="tm l" id="tmL" aria-hidden="true"></div>
+      <div class="tm r" id="tmR" aria-hidden="true"></div>
+
+      <div class="f-head">
+        <span class="f-title">Admissions Examination</span>
+        <span class="f-code">Form AI-2026 · Response grid</span>
+        <span class="f-scan" id="scanRead">Standby</span>
+      </div>
+
+      <div class="f-instr">
+        <span>Mark one oval per row</span>
+        <span>Use no. 2 pencil</span>
+        <span>Do not fold, staple or spindle</span>
+      </div>
+
+      <div class="f-mid">
+        <div class="grid-wrap" id="splashGrid">
+          <div class="scanline" id="scanline"></div>
+        </div>
+      </div>
+
+      <div class="f-foot">
+        <div class="legend" aria-hidden="true">
+          <div><span></span><b>A</b></div><div><span></span><b>B</b></div>
+          <div><span></span><b>C</b></div><div><span></span><b>D</b></div>
+          <div><span></span><b>E</b></div>
+        </div>
+        <div class="f-end">End of response grid<br>Do not write below this line</div>
+      </div>
+
+      <div class="hand-note" id="handNote">
+        <span>marked by AdmitIQ</span>
+        <svg viewBox="0 0 54 26" aria-hidden="true"><path d="M2 20 C 18 22, 34 18, 46 8 M46 8 L38 9 M46 8 L44 15"/></svg>
+      </div>
+
+      <div class="stamp" id="stamp" aria-hidden="true">
+        <svg class="mark" viewBox="0 0 46 34">
+          <ellipse cx="18" cy="17" rx="15" ry="12.5" fill="#1A46D0" transform="rotate(-9 18 17)"/>
+          <ellipse cx="29" cy="17" rx="15" ry="12.5" fill="#1A1A18" transform="rotate(7 29 17)" style="mix-blend-mode:multiply"/>
+        </svg>
+        <span class="word">ADMITIQ</span>
+      </div>
+    </div>
+  </div>
+  <button class="skip" id="skipBtn" type="button">Skip intro →</button>
+</div>
+
+<script>
+(function(){
+  var h=document.documentElement, s=document.getElementById('splash');
+  h.classList.add('has-splash');
+  function end(){
+    if(!h.classList.contains('has-splash')) return;
+    h.classList.remove('has-splash');
+    if(window.__introStop) window.__introStop();
+    if(window.__introReveal) window.__introReveal();
+    if(s&&s.parentNode) s.parentNode.removeChild(s);
+    if(window.__introShellEnd) window.__introShellEnd();
+    shell.forEach(function(el){ if(el) el.inert=false; });
+    var f=document.querySelector('#main a, #main button');
+    if(f) f.focus({preventScroll:true});
+  }
+  window.__introEnd=end;
+  if(!/[?&]t=/.test(location.search)) window.__introFailsafe=setTimeout(end,9000);
+  var shell=[document.querySelector('header.masthead'),document.getElementById('main'),
+            document.querySelector('footer.foot')];
+  shell.forEach(function(el){ if(el) el.inert=true; });
+  function skip(){ if(window.__introSkip) window.__introSkip(); else end(); }
+  document.getElementById('skipBtn').addEventListener('click',skip);
+  document.addEventListener('keydown',function(e){
+    if(e.key==='Escape'&&h.classList.contains('has-splash')) skip();
+  });
+  try{document.getElementById('skipBtn').focus({preventScroll:true});}catch(e){}
+})();
+</script>
+
+<script>
+(function(){
+"use strict";
+var RMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
+var REDUCE = RMQ.matches;
+if(RMQ.addEventListener) RMQ.addEventListener('change',function(){ location.reload(); });
+var Q = new URLSearchParams(location.search);
+var DBG_T = Q.has('t') ? parseFloat(Q.get('t')) : null;
+
+/* ---------- grain ---------- */
+(function(){
+  var n=160, c=document.createElement('canvas'); c.width=n; c.height=n;
+  var x=c.getContext('2d'), img=x.createImageData(n,n), d=img.data, i;
+  for(i=0;i<d.length;i+=4){
+    d[i]=d[i+1]=d[i+2]=130+((Math.random()*126)|0);
+    d[i+3]=(Math.random()*86)|0;
+  }
+  x.putImageData(img,0,0);
+  document.documentElement.style.setProperty('--grain','url('+c.toDataURL()+')');
+})();
+
+/* ---------- 5x7 dot matrix ---------- */
+var G = {
+  A:['01110','10001','10001','11111','10001','10001','10001'],
+  D:['11110','10001','10001','10001','10001','10001','11110'],
+  M:['10001','11011','10101','10001','10001','10001','10001'],
+  I:['111','010','010','010','010','010','111'],
+  T:['11111','00100','00100','00100','00100','00100','00100'],
+  Q:['01110','10001','10001','10001','10101','10010','01101']
+};
+function matrix(word, blueFrom){
+  var p=word.split(''), cols=0, i, r, c, x=0, cells=[];
+  for(i=0;i<p.length;i++) cols += G[p[i]][0].length + (i<p.length-1?1:0);
+  for(i=0;i<p.length;i++){
+    var rows=G[p[i]];
+    for(r=0;r<7;r++) for(c=0;c<rows[r].length;c++)
+      if(rows[r].charAt(c)==='1') cells.push({r:r,c:x+c,blue:i>=blueFrom});
+    x += rows[0].length + 1;
+  }
+  return {cols:cols, cells:cells};
+}
+var WORD = matrix('ADMITIQ', 5);
+var GRAPH='rgb(26,26,24)', BLUE='rgb(26,70,208)';
+
+function mixBlue(k){
+  var r=Math.round(26+(26-26)*k), g=Math.round(26+(70-26)*k), b=Math.round(26+(208-26)*k);
+  return 'rgb('+r+','+g+','+b+')';
+}
+function clamp(v,a,b){return v<a?a:(v>b?b:v);}
+function out(t){return 1-Math.pow(1-t,3);}
+function pad2(n){return (n<10?'0':'')+n;}
+
+/* ---------- response grid ---------- */
+function Grid(wrap, opt){
+  this.wrap=wrap; this.opt=opt||{};
+  this.canvas=document.createElement('canvas');
+  this.canvas.setAttribute('aria-hidden','true');
+  wrap.insertBefore(this.canvas, wrap.firstChild);
+  this.ctx=this.canvas.getContext('2d');
+  this.cols=WORD.cols;
+  this.wordIdx={}; this.blueIdx={}; this.jit={}; this.hovers={};
+  var i;
+  for(i=0;i<WORD.cells.length;i++){
+    var k=WORD.cells[i].r*this.cols+WORD.cells[i].c;
+    this.wordIdx[k]=1; if(WORD.cells[i].blue) this.blueIdx[k]=1;
+  }
+  this.tl={ringStart:420,ringDur:460,ringCell:230,markStart:900,markDur:760,
+    markCell:260,eraseStart:1620,eraseDur:300,eraseCell:250,
+    scanStart:-1,scanDur:640,blueCell:300};
+  this.hesitate=[];
+  this.geo=null; this.scanY=-1; this.t=0;
+}
+Grid.prototype.layout=function(){
+  var W=this.wrap.clientWidth||0, availH, o=this.opt;
+  if(W<80) return this.geo;
+  var gut = o.rowNumbers ? clamp(W*0.036,16,42) : 0;
+  if(o.fill) availH=this.wrap.clientHeight||0;
+  else availH=o.targetH||230;
+  if(availH<40) return this.geo;
+  var cellHW=(W-gut)/this.cols/1.35;
+  var rows=Math.round(availH/cellHW);
+  rows=clamp(rows, o.minRows||10, o.maxRows||46);
+  var cellH=availH/rows, cellW=cellH*1.35;
+  if(gut+this.cols*cellW>W){ cellW=(W-gut)/this.cols; cellH=cellW/1.35; }
+  var gridW=gut+this.cols*cellW, gridH=rows*cellH;
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  this.rows=rows;
+  this.geo={W:gridW,H:gridH,cw:cellW,ch:cellH,ox:gut,oy:0,gut:gut,
+    off:Math.max(0,(this.wrap.clientHeight-gridH)/2)};
+  this.dpr=dpr;
+  this.canvas.width=Math.round(gridW*dpr); this.canvas.height=Math.round(gridH*dpr);
+  this.canvas.style.width=gridW+'px'; this.canvas.style.height=gridH+'px';
+  var bkey=this.cols+'x'+this.rows;
+  if(this.built!==bkey){ this.build(); this.built=bkey; }
+  var scan=this.wrap.querySelector('.scanline');
+  if(scan) scan.style.top=this.geo.off+'px';
+  return this.geo;
+};
+Grid.prototype.build=function(){
+  var i, n=this.cols*this.rows, seen={};
+  this.hesitate=[];
+  for(i=0;i<WORD.cells.length;i++) seen[WORD.cells[i].r*this.cols+WORD.cells[i].c]=1;
+  var pool=[];
+  for(i=0;i<n;i++) if(!seen[i]) pool.push(i);
+  for(i=0;i<n;i++) this.jit[i]=Math.random();
+  var count=clamp(Math.round(n*0.016),6,14);
+  for(i=0;i<count && pool.length;i++){
+    var j=(Math.random()*pool.length)|0;
+    this.hesitate[pool[j]]=1; pool.splice(j,1);
+  }
+  this.rowOf=function(k){return (k/this.cols)|0;};
+};
+Grid.prototype.progress=function(t){
+  this.t=t;
+  var tl=this.tl, geo=this.geo;
+  if(!geo) return;
+  if(tl.scanStart>=0){
+    var sp=clamp((t-tl.scanStart)/tl.scanDur,0,1);
+    this.scanY = sp>0 && sp<1 ? geo.off + sp*geo.H : (sp>=1?geo.off+geo.H:-1);
+    this.scanP=sp;
+  }
+  this.draw(t);
+};
+Grid.prototype.draw=function(t){
+  var geo=this.geo, ctx=this.ctx, tl=this.tl, o=this.opt;
+  if(!geo||geo.cw<=0||geo.ch<=0) return;
+  ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+  ctx.clearRect(0,0,geo.W,geo.H);
+  var cols=this.cols, rows=this.rows, cw=geo.cw, ch=geo.ch, ox=geo.ox, oy=geo.oy;
+  var rx=cw*0.40, ry=ch*0.40, i, r, c, cx, cy, a, m, blue, ring, key, age;
+  var scanT=tl.scanStart, hasScan=scanT>=0;
+  var now=performance.now();
+
+  /* row numbers */
+  if(o.rowNumbers && ch>=5.5){
+    ctx.font='500 '+Math.min(11,Math.max(6.5,ch*0.52))+'px "DM Mono",ui-monospace,monospace';
+    ctx.fillStyle='#C22D1E';
+    ctx.textAlign='right'; ctx.textBaseline='middle';
+    for(r=0;r<rows;r++)
+      ctx.fillText(pad2(r+1), ox-Math.max(6,cw*0.3), oy+r*ch+ch/2);
+  }
+
+  var n=cols*rows;
+  for(i=0;i<n;i++){
+    r=(i/cols)|0; c=i-cols*r;
+    var dr=tl.ringStart + ((c/cols)*0.55 + (r/rows)*0.45)*tl.ringDur + this.jit[i]*90;
+    a=out(clamp((t-dr)/tl.ringCell,0,1));
+    if(a<=0) continue;
+    cx=ox+c*cw+cw/2; cy=oy+r*ch+ch/2;
+    m=0; blue=0;
+    var dm=tl.markStart + ((c/cols)*0.72 + (r/rows)*0.28)*tl.markDur + this.jit[i]*130;
+    if(this.wordIdx[i]) m=out(clamp((t-dm)/tl.markCell,0,1));
+    else if(this.hesitate[i]) m=out(clamp((t-dm)/tl.markCell,0,1))*(1-clamp((t-(tl.eraseStart+(r/rows)*tl.eraseDur))/tl.eraseCell,0,1));
+    var pass=-1, glow=0, scale=1;
+    if(hasScan && this.scanP>0){
+      pass=scanT + ((cy-oy)/geo.H)*tl.scanDur;
+      if(t>pass){
+        var bg=clamp((t-pass)/tl.blueCell,0,1);
+        if(this.blueIdx[i]) blue=bg;
+        age=t-pass;
+        if(age<170){ var k=1-age/170; scale=1+0.09*k; glow=0.34*k; }
+      }
+    }
+    if(m<1){ ring=0.34*a*(1-m*0.85)+glow*a; ctx.strokeStyle='rgba(26,26,24,'+ring.toFixed(3)+')'; }
+    else { ring=0.14*a+glow*a; ctx.strokeStyle='rgba(26,26,24,'+ring.toFixed(3)+')'; }
+    ctx.lineWidth=Math.max(1,ch*0.075);
+    ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,6.2832); ctx.stroke();
+
+    if(m>0.01){
+      var rr=rx*Math.min(1,m)*scale, r2=ry*Math.min(1,m)*scale;
+      ctx.fillStyle = blue>0 ? mixBlue(blue) : GRAPH;
+      ctx.globalAlpha = m<1 ? 0.55+0.45*m : 1;
+      ctx.beginPath(); ctx.ellipse(cx,cy,rr,r2,0,0,6.2832); ctx.fill();
+      ctx.globalAlpha = 0.15*m;
+      ctx.fillStyle='#FFFFFF';
+      ctx.beginPath(); ctx.ellipse(cx-rr*0.16,cy-r2*0.2,rr*0.56,r2*0.46,0,0,6.2832); ctx.fill();
+      ctx.globalAlpha=1;
+    }
+    /* hover marks */
+    var hv=this.hovers[i];
+    if(hv!==undefined){
+      var fade=1-clamp((now-hv.t0)/1100,0,1);
+      if(fade<=0){ delete this.hovers[i]; }
+      else{
+        var hr=rx*0.96, h2=ry*0.96;
+        ctx.globalAlpha=fade*0.9;
+        ctx.fillStyle = hv.blue ? BLUE : GRAPH;
+        ctx.beginPath(); ctx.ellipse(cx,cy,hr,h2,0,0,6.2832); ctx.fill();
+        ctx.globalAlpha=1;
+      }
+    }
+  }
+};
+
+/* ---------- blue without a scan pass ---------- */
+var _draw = Grid.prototype.draw;
+Grid.prototype.draw = function(t){
+  _draw.call(this,t);
+  if(this.opt.blueStatic && this.scanY<0){
+    var geo=this.geo, ctx=this.ctx, o=this.opt;
+    ctx.setTransform(this.dpr,0,0,this.dpr,0,0);
+    var i,rx=geo.cw*0.40, ry=geo.ch*0.40;
+    for(i in this.blueIdx){
+      var k=+i, r=(k/this.cols)|0, c=k-this.cols*r;
+      var dm=this.tl.markStart + ((c/this.cols)*0.72 + (r/this.rows)*0.28)*this.tl.markDur + this.jit[k]*130;
+      var m=out(clamp((t-dm)/this.tl.markCell,0,1));
+      if(m<0.98) continue;
+      var cx=geo.ox+c*geo.cw+geo.cw/2, cy=geo.oy+r*geo.ch+geo.ch/2;
+      ctx.save();
+      ctx.beginPath(); ctx.ellipse(cx,cy,rx*0.99,ry*0.99,0,0,6.2832); ctx.clip();
+      ctx.globalAlpha=(m-0.98)/0.02;
+      ctx.fillStyle=BLUE;
+      ctx.beginPath(); ctx.ellipse(cx,cy,rx,ry,0,0,6.2832); ctx.fill();
+      ctx.globalAlpha=0.15;
+      ctx.fillStyle='#FFFFFF';
+      ctx.beginPath(); ctx.ellipse(cx-rx*0.16,cy-ry*0.2,rx*0.56,ry*0.46,0,0,6.2832); ctx.fill();
+      ctx.restore(); ctx.globalAlpha=1;
+    }
+  }
+};
+
+/* ---------- splash timeline ---------- */
+var sp=document.getElementById('splash');
+var T={stamp:2740,hand:2840,jolt:3300,exit:3550};
+var raf=null, exited=false, start=null;
+var beats={stamp:false,hand:false,jolt:false};
+
+function buildTicks(){
+  ['tmL','tmR'].forEach(function(id){
+    var el=document.getElementById(id); if(!el) return;
+    var n=18, i, h='';
+    for(i=0;i<n;i++) h+='<i style="animation-delay:'+(140+i*17)+'ms"></i>';
+    el.innerHTML=h;
+  });
+}
+function applyBeats(t){
+  var sl=document.getElementById('scanline'), rd=document.getElementById('scanRead');
+  if(sl&&sg.geo){
+    if(sg.scanP>0&&sg.scanP<1){ sl.style.opacity='1'; sl.style.transform='translateY('+(sg.scanP*sg.geo.H)+'px)'; }
+    else if(sg.scanP>=1){ sl.style.opacity='0'; }
+    else sl.style.opacity='0';
+  }
+  if(rd){
+    if(sg.scanP>0&&sg.scanP<1){
+      rd.textContent='Scanning · '+pad2(Math.round(sg.scanP*sg.rows*sg.cols))+'/'+(sg.rows*sg.cols);
+      rd.style.color='var(--red)';
+    } else if(sg.scanP>=1){ rd.textContent='Read complete'; rd.style.color='var(--ink)'; }
+    else rd.textContent='Standby';
+  }
+  var st=document.getElementById('stamp'), hn=document.getElementById('handNote');
+  if(!beats.stamp&&t>=T.stamp&&st){ beats.stamp=true; st.classList.add('on'); }
+  if(!beats.hand&&t>=T.hand&&hn){ beats.hand=true; hn.classList.add('on'); }
+  if(!beats.jolt&&t>=T.jolt&&sp){ beats.jolt=true; sp.classList.add('jolt'); }
+}
+function frame(ts){
+  if(start===null) start=ts;
+  var t=ts-start;
+  sg.progress(t); applyBeats(t);
+  if(t>=T.exit){ beginExit(); return; }
+  raf=requestAnimationFrame(frame);
+}
+function revealLanding(){
+  document.documentElement.classList.add('intro-live');
+  var o=document.getElementById('h1Oval'); if(o) o.classList.add('is-marked');
+}
+window.__introReveal=revealLanding;
+function beginExit(){
+  if(exited||!sp) return;
+  exited=true;
+  if(raf) cancelAnimationFrame(raf);
+  revealLanding();
+  sp.classList.remove('jolt');
+  sp.classList.add('out');
+  clearTimeout(window.__introFailsafe);
+  spawnFx();
+  setTimeout(function(){ window.__introEnd(); }, REDUCE?470:650);
+}
+window.__introSkip=function(){ if(REDUCE||DBG_T!==null){ revealLanding(); window.__introEnd(); return; } beginExit(); };
+window.__introStop=function(){ if(raf) cancelAnimationFrame(raf); raf=null; exited=true; };
+function spawnFx(){
+  if(REDUCE) return;
+  var fx=document.getElementById('fx'), i;
+  for(i=0;i<16;i++){
+    var d=document.createElement('i'), w=7+Math.random()*11;
+    d.style.width=w+'px'; d.style.height=(w*0.72)+'px';
+    d.style.left=(6+Math.random()*86)+'vw'; d.style.top=(8+Math.random()*72)+'vh';
+    if(i%7===0) d.style.background=BLUE;
+    fx.appendChild(d);
+    d.animate([{transform:'translate(0,0) rotate(0deg)',opacity:.92},
+               {transform:'translate('+(Math.random()*90-45)+'px,'+(-(140+Math.random()*240))+'px) rotate('+(Math.random()*240-120)+'deg)',opacity:0}],
+      {duration:850+Math.random()*650, delay:i*32, easing:'cubic-bezier(.2,.75,.3,1)', fill:'forwards'});
+  }
+  setTimeout(function(){ fx.innerHTML=''; },2300);
+}
+
+/* ---------- grids ---------- */
+var sg=null;
+if(sp){
+  sg=new Grid(document.getElementById('splashGrid'),
+    {fill:true,rowNumbers:true,minRows:14,maxRows:46});
+  sg.tl={ringStart:420,ringDur:460,ringCell:230,markStart:880,markDur:740,markCell:260,
+         eraseStart:1580,eraseDur:300,eraseCell:250,scanStart:2050,scanDur:620,blueCell:300};
+  sg.layout();
+  buildTicks();
+  if(Q.has('nosplash')){ revealLanding(); window.__introEnd(); sp=null; }
+  else if(REDUCE){
+    sg.progress(1e6); applyBeats(1e6);
+    document.getElementById('stamp').classList.add('on');
+    document.getElementById('handNote').classList.add('on');
+    setTimeout(beginExit,1000);
+  } else if(DBG_T!==null){ sg.progress(DBG_T); applyBeats(DBG_T); }
+  else raf=requestAnimationFrame(frame);
+} else { revealLanding(); }
+
+/* ---------- hero logotype grid ---------- */
+var hg=new Grid(document.getElementById('heroGrid'),
+  {fill:false,targetH:238,rowNumbers:false,minRows:9,maxRows:14,blueStatic:true});
+hg.tl={ringStart:0,ringDur:420,ringCell:220,markStart:260,markDur:820,markCell:250,
+       eraseStart:1e9,eraseDur:1,eraseCell:1,scanStart:-1,blueCell:300};
+hg.layout();
+var HERO_DUR=1450, heroStart=null, heroDone=false, heroRaf=null;
+
+function heroLoop(){
+  heroRaf=null;
+  var live=false,k;
+  for(k in hg.hovers){ live=true; break; }
+  if(live||hg.dirty){ hg.dirty=false; hg.progress(hg.t); heroRaf=requestAnimationFrame(heroLoop); }
+}
+function heroRun(ts){
+  if(heroStart===null) heroStart=ts;
+  var p=clamp((ts-heroStart)/HERO_DUR,0,1);
+  hg.progress(p*HERO_DUR);
+  if(p<1) requestAnimationFrame(heroRun);
+  else { heroDone=true; hg.dirty=true; heroLoop(); }
+}
+var heroPending=false, heroStarted=false;
+function heroKick(){
+  if(heroStarted) return; heroStarted=true;
+  if(REDUCE){ hg.progress(1e6); hg.dirty=true; heroLoop(); }
+  else requestAnimationFrame(heroRun);
+}
+var hio=new IntersectionObserver(function(es){
+  es.forEach(function(e){
+    if(e.isIntersecting){
+      hio.disconnect();
+      if(document.documentElement.classList.contains('intro-live')) heroKick();
+      else heroPending=true;
+    }
+  });
+},{threshold:.25});
+hio.observe(document.getElementById('heroGrid'));
+
+document.getElementById('heroGrid').addEventListener('pointermove',function(e){
+  if(REDUCE||!heroDone||!hg.geo) return;
+  var rc=hg.canvas.getBoundingClientRect();
+  var x=e.clientX-rc.left, y=e.clientY-rc.top, g=hg.geo;
+  var c=Math.floor((x-g.ox)/g.cw), r=Math.floor((y-g.oy)/g.ch);
+  if(c<0||r<0||c>=hg.cols||r>=hg.rows) return;
+  var k=r*hg.cols+c;
+  if(hg.hovers[k]){ hg.hovers[k].t0=performance.now(); return; }
+  hg.hovers[k]={t0:performance.now(),blue:!!hg.wordIdx[k]};
+  if(!heroRaf) heroRaf=requestAnimationFrame(heroLoop);
+});
+
+window.__introShellEnd=function(){
+  sp=null;
+  hg.layout(); hg.dirty=true;
+  if(heroPending) heroKick();
+  if(heroDone||REDUCE){ hg.progress(heroDone?hg.t:1e6); if(!heroRaf) heroRaf=requestAnimationFrame(heroLoop); }
+};
+
+/* ---------- jobs reveal ---------- */
+var jo=new IntersectionObserver(function(es){
+  es.forEach(function(e){ if(e.isIntersecting){ e.target.classList.add('in'); jo.unobserve(e.target);} });
+},{threshold:.45});
+Array.prototype.forEach.call(document.querySelectorAll('.jobs li'),function(li){ jo.observe(li); });
+
+/* ---------- resize ---------- */
+var rt=null;
+window.addEventListener('resize',function(){
+  clearTimeout(rt);
+  rt=setTimeout(function(){
+    if(sg&&sp){ sg.layout(); sg.progress(Math.max(sg.t,DBG_T||0)); if(DBG_T!==null) applyBeats(DBG_T); }
+    hg.layout(); hg.dirty=true; if(heroDone||REDUCE){ hg.progress(heroDone?hg.t:1e6); if(!heroRaf) heroRaf=requestAnimationFrame(heroLoop); }
+  },160);
+});
+
+/* ---------- replay ---------- */
+var rp=document.getElementById('replay');
+if(rp) rp.addEventListener('click',function(){ location.replace(location.pathname); });
+})();
+</script>
+</body>
+</html>
