@@ -2,3 +2,16 @@
 .impeccable/
 .vercel
 node_modules/
+.env
+.env.*
+!.env.example
+# API keys — never commit these
+js/config.js
+config.js
+*.local
+# Legacy single-file build contains a hardcoded API key — never commit it
+Admit IQ-3.html
+AdmitIQ-3.html
+*.html.bak
+# Workspace metadata
+.freebuff/
