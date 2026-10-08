@@ -17,8 +17,28 @@ $('#hp').onclick=()=>openAI();
 document.body.dataset.t=state.theme;
 show('dash');
 
-/* ---------- splash: draw-on, fade-out ---------- */
-(function(){const sp=$('#splash');if(!sp)return;
- const out=()=>{if(sp.classList.contains('out'))return;sp.classList.add('out');setTimeout(()=>sp.remove(),800)};
- sp.addEventListener('click',out);
- setTimeout(out,2400)})();
+/* ---------- splash: logo draw-on, word slide-in, fade-out ---------- */
+(function(){
+ const sp=$('#splash'),stage=sp&&sp.querySelector('.stage');
+ if(!sp||!stage)return;
+ const spSpan=stage.querySelector('.word span');
+ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const wait=ms=>new Promise(r=>setTimeout(r,ms));
+ async function play(){
+  stage.classList.remove('play','done');
+  await Promise.race([document.fonts.ready,wait(800)]);
+  stage.style.setProperty('--w',(spSpan.offsetWidth+3)+'px');
+  void stage.offsetWidth;
+  stage.classList.add('play');
+  if(reduce)return finish(400);
+  setTimeout(()=>stage.classList.add('done'),1800);
+  setTimeout(finish,2200);
+ }
+ function finish(delay){
+  stage.classList.add('done');
+  sp.classList.add('out');
+  window.dispatchEvent(new Event('splash:done'));
+  setTimeout(()=>sp.remove(),(delay||0)+450);
+ }
+ play();
+})();
