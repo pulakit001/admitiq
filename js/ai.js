@@ -61,6 +61,13 @@ async function aiAsk(q, { grounded = true, json = false, temp = .5, max = 2048, 
     return b;
   };
   const chain = keyChain();
+  // No usable keys configured (e.g. GEMINI_API_KEYS missing at deploy time):
+  // fail immediately with an actionable message instead of a raw Google 403.
+  if (!chain[0]) {
+    const e = new Error('No API key is configured on this deployment. The server owner needs to set the GEMINI_API_KEYS environment variable in Vercel project settings, then redeploy.');
+    e.status = 0;
+    throw e;
+  }
   // Model variants in priority order; grounding tried first when allowed.
   const variants = grounded
     ? [[MODELS[0], true], [MODELS[0], false], [MODELS[1], false]]
@@ -88,6 +95,9 @@ async function aiAsk(q, { grounded = true, json = false, temp = .5, max = 2048, 
           // Quota exhausted or key rejected — fail over to the next key
           // permanently and skip the remaining model variants on this key.
           markKeyExhausted();
+          if (chain.every(k => !k)) break;
+          // Make a rejected-key 403 readable instead of a bare status code.
+          if (e.status === 403) err = new Error('API key rejected (403) — check that the Gemini key is valid and the Generative Language API is enabled.');
           break;
         }
       }
