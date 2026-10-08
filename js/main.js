@@ -26,13 +26,25 @@ show('dash');
  const wait=ms=>new Promise(r=>setTimeout(r,ms));
  async function play(){
   stage.classList.remove('play','done');
-  await Promise.race([document.fonts.ready,wait(800)]);
-  stage.style.setProperty('--w',(spSpan.offsetWidth+3)+'px');
+  // Force the exact splash font (600-weight Inter Tight) to finish loading
+  // before measuring, so the reveal width never clips the wordmark on any
+  // orientation or screen size.
+  await Promise.race([
+    Promise.all([document.fonts.load('600 40px "Inter Tight"'), document.fonts.ready]).catch(()=>{}),
+    wait(1200)
+  ]);
+  measure();
+  document.fonts.ready.then(()=>{ if(sp.isConnected&&!finished) measure(); });
   void stage.offsetWidth;
   stage.classList.add('play');
   if(reduce)return finish(400);
   setTimeout(()=>stage.classList.add('done'),1800);
   setTimeout(finish,2200);
+ }
+ function measure(){
+  if(!sp.isConnected)return;
+  const fs=parseFloat(getComputedStyle(sp).fontSize)||40;
+  stage.style.setProperty('--w',(sp.offsetWidth+fs*0.12)+'px');
  }
  function finish(delay){
   stage.classList.add('done');
