@@ -4,15 +4,12 @@ const ICONS={
  compare:'<rect x="4" y="5" width="7" height="14" rx="2"/><rect x="13" y="5" width="7" height="14" rx="2"/>',
  career:'<circle cx="12" cy="12" r="8"/><path d="M15 9l-2 5-4 1 2-5z"/>',
  essay:'<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>'};
-const AI_QUOTA=80;
-function aiQuota(){return {used:Math.min(state.aiCount,AI_QUOTA),left:Math.max(0,AI_QUOTA-state.aiCount)}}
 function renderDash(){
  const d=new Date(),hr=d.getHours(),greet=hr<12?'Good morning':hr<17?'Good afternoon':'Good evening';
  const date=d.toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric'});
  const pf=state.profile?Object.values(state.profile.answers||{}).filter(v=>String(v||'').trim()).length:0;
  const profilePct=pf?Math.round(pf/QS.length*100):0;
  const reports=(state.recs?1:0)+Object.keys(state.research).length+(state.cmpStory?1:0)+((state.career&&state.career.paths.length)?1:0)+state.essays.length;
- const q=aiQuota(),ringPct=Math.round(q.left/AI_QUOTA*100),circ=2*Math.PI*26;
  let step='Complete your college match profile.',go='match',cta='Start match';
  if(pf&&!state.recs){step='Get your first set of college matches.';go='match';cta='Find colleges'}
  else if(pf&&state.recs&&!state.cmpStory){step='Compare your top matches side by side.';go='compare';cta='Open compare'}
@@ -28,13 +25,6 @@ function renderDash(){
    <div class="sub" style="font-size:14px">${date}</div>
    <div class="greet">${greet}</div>
    <p class="sub" style="font-size:15px;margin:12px 0 18px">Matches, comparisons, chances, essay work and career planning — all from one dashboard.</p>
-   <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">
-    <div class="ring" style="width:76px;height:76px;margin:0">
-     <svg viewBox="0 0 64 64" width="76" height="76"><circle cx="32" cy="32" r="26" fill="none" stroke="var(--b3)" stroke-width="5"/><circle cx="32" cy="32" r="26" fill="none" stroke="var(--lime)" stroke-width="5" stroke-linecap="round" stroke-dasharray="${circ}" stroke-dashoffset="${circ*(1-ringPct/100)}" transform="rotate(-90 32 32)" style="transition:stroke-dashoffset .8s cubic-bezier(.2,.8,.3,1)"/></svg>
-     <div class="rv"><b style="font-size:15px">${q.left}</b></div>
-    </div>
-    <div><b style="font-weight:500">Arisa AI</b><div class="sub">${q.used}/${AI_QUOTA} used · ${q.left} left</div></div>
-   </div>
    <div class="ministats">
    <div class="mstat"><small>Profile</small><b>${profilePct}%</b><span>${pf} of ${QS.length} fields</span></div>
    <div class="mstat"><small>Reports</small><b>${reports}</b><span>total generated</span></div>

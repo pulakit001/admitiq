@@ -15,7 +15,7 @@ Everything runs client-side — there is no server and no database. All user dat
 | **Career Compass** | List your hobbies and interests — chess, guitar, football, coding. The AI reads them *together as one picture* (not one by one) and returns 5 career paths, each with a fit %, real job titles, Indian market outlook, early-career salary, a 4-step roadmap from today to first job, and one concrete first step for the next month. |
 | **Essay feedback** | Pick the target college (Harvard, Cambridge, IIT Bombay — any), the essay type, paste the exact prompt and your full essay. The AI grades it 0–100 on five axes (Clarity, Structure, Fit to prompt, Voice & originality, Mechanics), tells you what the prompt *really* asks for, lists strengths, gives 4 specific improvement bullets referencing your actual sentences, and rewrites one line to show the difference. |
 | **Ask Anything** | A popup counsellor (✦ button or Ctrl/⌘+K) that sees your saved profile, matches, comparisons and essay reports — answers render with real markdown (bold, bullets, headings), not raw symbols. |
-| **Insights** | Two tabs: **Responses** (every questionnaire answer, researched-college table, essay reports) and **General analytics** (AI research runs, Arisa AI quota, active API key, activity summary). |
+| **Insights** | Two tabs: **Responses** (every questionnaire answer, researched-college table, essay reports) and **General analytics** (AI research runs, active API key, activity summary). |
 
 ---
 
@@ -96,7 +96,7 @@ admitiq/
 │   ├── motion.js         # Reveal-on-scroll + rotating search hint
 │   ├── main.js           # Router, theme, command bar, splash
 │   └── views/
-│       ├── dash.js       # Overview (quick access, Arisa AI quota ring, tiles)
+│       ├── dash.js       # Overview (quick access card, workspace tiles)
 │       ├── match.js      # Questionnaire + AI college matching
 │       ├── compare.js    # Measures, weights, deterministic scoring, AI verdict
 │       ├── career.js     # Career Compass

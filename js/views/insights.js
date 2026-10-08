@@ -11,8 +11,7 @@ function renderInsights(){
 function insBox(){
  if(state.insTab==='ana'){
   const runs=state.aiCount,reports=(state.recs?1:0)+Object.keys(state.research).length+(state.cmpStory?1:0)+((state.career&&state.career.paths.length)?1:0)+state.essays.length;
-  const q=aiQuota();
-  return `<div class="stats">${statCards()}<div class="stat"><small>AI research runs</small><b>${runs}</b></div><div class="stat"><small>Arisa AI quota left</small><b>${q.left}/${AI_QUOTA}</b></div><div class="stat"><small>Active API key</small><b>#${state.keyIdx+1}</b></div><div class="stat"><small>Reports generated</small><b>${reports}</b></div></div>
+  return `<div class="stats">${statCards()}<div class="stat"><small>AI research runs</small><b>${runs}</b></div><div class="stat"><small>Active API key</small><b>#${state.keyIdx+1}</b></div><div class="stat"><small>Reports generated</small><b>${reports}</b></div></div>
  <div class="card" style="margin-top:14px;padding:18px 20px"><div class="lb">Activity summary</div>
   <div class="krow"><span>College matches generated</span><b>${state.recs&&state.recs.colleges?state.recs.colleges.length:0}</b></div>
   <div class="krow"><span>Colleges deeply researched</span><b>${Object.values(state.research).filter(d=>d&&!d._error).length}</b></div>
